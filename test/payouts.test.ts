@@ -1,0 +1,139 @@
+import { beforeEach, describe, expect, it } from "vitest";
+import { createApp } from "../src/app.ts";
+import { openDatabase } from "../src/db.ts";
+import { seedIncident } from "../src/seed.ts";
+
+type App = ReturnType<typeof createApp>;
+
+function setup(): App {
+  const db = openDatabase(":memory:");
+  seedIncident(db);
+  return createApp(db);
+}
+
+async function postJson(app: App, path: string, body: unknown) {
+  return app.request(path, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+describe("aprovação da entrega", () => {
+  let app: App;
+
+  beforeEach(() => {
+    app = setup();
+  });
+
+  it("credita a missão aprovada às 22:02 em São Paulo no dia do prazo", async () => {
+    const res = await postJson(app, "/approvals", {
+      mission_id: "msn_1842",
+      approved_at: "2026-03-13T01:02:00.000Z",
+      idempotency_key: "pay_9f3",
+    });
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { ledger: { amount_brl: number } };
+    expect(body.ledger.amount_brl).toBe(150);
+  });
+
+  it("grava o valor da missão em reais", async () => {
+    const res = await postJson(app, "/approvals", {
+      mission_id: "msn_1900",
+      approved_at: "2026-03-12T18:11:00.000Z",
+      idempotency_key: "pay_22a",
+    });
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { ledger: { amount_brl: number } };
+    expect(body.ledger.amount_brl).toBe(150);
+  });
+
+  it("não credita de novo quando a confirmação do provedor chega outra vez", async () => {
+    const first = await postJson(app, "/approvals", {
+      mission_id: "msn_1900",
+      approved_at: "2026-03-12T18:11:00.000Z",
+      idempotency_key: "pay_22a",
+    });
+    expect(first.status).toBe(201);
+    const second = await postJson(app, "/approvals", {
+      mission_id: "msn_1900",
+      approved_at: "2026-03-12T18:11:00.000Z",
+      idempotency_key: "pay_22a ",
+    });
+    expect(second.status).toBeLessThan(500);
+    const mission = await app.request("/missions/msn_1900");
+    const body = (await mission.json()) as { ledger: unknown[] };
+    expect(body.ledger).toHaveLength(1);
+  });
+
+  it("aceita a mesma chave uma única vez", async () => {
+    const payload = {
+      mission_id: "msn_2044",
+      approved_at: "2026-03-20T15:00:00.000Z",
+      idempotency_key: "pay_same",
+    };
+    expect((await postJson(app, "/approvals", payload)).status).toBe(201);
+    expect((await postJson(app, "/approvals", payload)).status).toBe(200);
+    const mission = await app.request("/missions/msn_2044");
+    const body = (await mission.json()) as { ledger: unknown[] };
+    expect(body.ledger).toHaveLength(1);
+  });
+
+  it("recusa aprovação no dia seguinte ao prazo", async () => {
+    const res = await postJson(app, "/approvals", {
+      mission_id: "msn_1842",
+      approved_at: "2026-03-13T15:00:00.000Z",
+      idempotency_key: "pay_late",
+    });
+    expect(res.status).toBe(409);
+  });
+
+  it("responde 404 para missão inexistente", async () => {
+    const res = await postJson(app, "/approvals", {
+      mission_id: "msn_missing",
+      approved_at: "2026-03-12T18:11:00.000Z",
+      idempotency_key: "pay_missing",
+    });
+    expect(res.status).toBe(404);
+  });
+});
+
+describe("status do provedor", () => {
+  let app: App;
+
+  beforeEach(() => {
+    app = setup();
+  });
+
+  async function payoutId(): Promise<string> {
+    const res = await postJson(app, "/approvals", {
+      mission_id: "msn_2044",
+      approved_at: "2026-03-20T15:00:00.000Z",
+      idempotency_key: "pay_provider",
+    });
+    const body = (await res.json()) as { payout: { id: string } };
+    return body.payout.id;
+  }
+
+  it("mantém o repasse pendente enquanto o provedor não confirma", async () => {
+    const id = await payoutId();
+    const res = await postJson(app, `/payouts/${id}/provider`, { provider_status: "PENDING" });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { status: string };
+    expect(body.status).toBe("pending");
+  });
+
+  it("marca como pago quando o provedor confirma o recebimento", async () => {
+    const id = await payoutId();
+    const res = await postJson(app, `/payouts/${id}/provider`, { provider_status: "RECEIVED" });
+    const body = (await res.json()) as { status: string };
+    expect(body.status).toBe("paid");
+  });
+
+  it("marca falha quando o provedor falha", async () => {
+    const id = await payoutId();
+    const res = await postJson(app, `/payouts/${id}/provider`, { provider_status: "FAILED" });
+    const body = (await res.json()) as { status: string };
+    expect(body.status).toBe("failed");
+  });
+});

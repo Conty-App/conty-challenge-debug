@@ -1,0 +1,11 @@
+{"level":30,"time":"2026-03-13T00:58:02.104Z","msg":"http.request","method":"GET","path":"/health","status":503,"duration_ms":10002,"err":"upstream timeout"}
+{"level":30,"time":"2026-03-13T00:58:14.441Z","msg":"http.request","method":"GET","path":"/health","status":200,"duration_ms":12}
+{"level":30,"time":"2026-03-13T01:02:18.773Z","msg":"approval.received","mission_id":"msn_1842","idempotency_key":"pay_9f3","approved_at":"2026-03-13T01:02:00.000Z","deadline_date":"2026-03-12","amount_cents":15000}
+{"level":40,"time":"2026-03-13T01:02:18.790Z","msg":"approval.rejected","mission_id":"msn_1842","reason":"expired","approved_day":"2026-03-13","deadline_date":"2026-03-12"}
+{"level":30,"time":"2026-03-13T01:11:02.015Z","msg":"approval.received","mission_id":"msn_1900","idempotency_key":"pay_22a","approved_at":"2026-03-12T18:11:00.000Z","deadline_date":"2026-03-20","amount_cents":15000}
+{"level":30,"time":"2026-03-13T01:11:02.040Z","msg":"ledger.credit","mission_id":"msn_1900","idempotency_key":"pay_22a","amount_brl":"1.50"}
+{"level":30,"time":"2026-03-13T01:11:09.112Z","msg":"approval.received","mission_id":"msn_1900","idempotency_key":"pay_22a ","approved_at":"2026-03-12T18:11:00.000Z","deadline_date":"2026-03-20","amount_cents":15000}
+{"level":30,"time":"2026-03-13T01:11:09.130Z","msg":"ledger.credit","mission_id":"msn_1900","idempotency_key":"pay_22a ","amount_brl":"1.50"}
+{"level":30,"time":"2026-03-13T01:20:44.501Z","msg":"provider.callback","payout_id":"payo_44","mission_id":"msn_1900","provider_status":"PENDING"}
+{"level":30,"time":"2026-03-13T01:20:44.519Z","msg":"payout.status","payout_id":"payo_44","status":"paid"}
+{"level":30,"time":"2026-03-13T01:22:01.880Z","msg":"http.request","method":"POST","path":"/approvals","status":404,"mission_id":"msn_missing"}
