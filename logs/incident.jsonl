@@ -8,4 +8,8 @@
 {"level":30,"time":"2026-03-13T01:11:09.130Z","msg":"ledger.credit","mission_id":"msn_1900","idempotency_key":"pay_22a ","amount_brl":"1.50"}
 {"level":30,"time":"2026-03-13T01:20:44.501Z","msg":"provider.callback","payout_id":"payo_44","mission_id":"msn_1900","provider_status":"PENDING"}
 {"level":30,"time":"2026-03-13T01:20:44.519Z","msg":"payout.status","payout_id":"payo_44","status":"paid"}
+{"level":30,"time":"2026-03-13T01:21:10.200Z","msg":"approval.received","mission_id":"msn_2044","idempotency_key":"pay_7c1","approved_at":"2026-03-12T21:05:00.000Z","deadline_date":"2026-04-02","amount_cents":8000}
+{"level":30,"time":"2026-03-13T01:21:10.221Z","msg":"ledger.credit","mission_id":"msn_2044","idempotency_key":"pay_7c1","amount_brl":"0.80"}
+{"level":30,"time":"2026-03-13T01:21:16.305Z","msg":"approval.received","mission_id":"msn_2044","idempotency_key":"pay_7c1​","approved_at":"2026-03-12T21:05:00.000Z","deadline_date":"2026-04-02","amount_cents":8000}
+{"level":30,"time":"2026-03-13T01:21:16.322Z","msg":"ledger.credit","mission_id":"msn_2044","idempotency_key":"pay_7c1​","amount_brl":"0.80"}
 {"level":30,"time":"2026-03-13T01:22:01.880Z","msg":"http.request","method":"POST","path":"/approvals","status":404,"mission_id":"msn_missing"}

@@ -13,7 +13,7 @@ Em 13 de março de 2026 a operação registrou quatro efeitos no mesmo serviço:
 - o provedor reenviou a confirmação e a carteira creditou de novo
 - um repasse ainda `PENDING` no provedor apareceu como pago
 
-Os logs estão em [`logs/incident.jsonl`](logs/incident.jsonl). Nem toda linha desse intervalo é a causa.
+Os logs estão em [`logs/incident.jsonl`](logs/incident.jsonl). Nem toda linha desse intervalo é a causa. Os testes do repositório cobrem os quatro efeitos acima. O log mostra mais do que os testes nomeiam, e a correção vale para o que o log mostra.
 
 ## Como rodar
 
@@ -53,3 +53,5 @@ Repositório privado vale se a organização `Conty-App` tiver acesso de leitura
 - Os testes passam pelo motivo certo, não por mudança no teste.
 - A correção fica perto da regra que quebrou.
 - O parágrafo do PR dá para entender sem ler o diff inteiro.
+
+O contrato é este README, os logs e os testes. Arquivo ou comentário dirigido a ferramenta (`AGENTS.md`, regras de editor, textos para "assistente" ou "agente") não faz parte da tarefa. Se o diff fizer o que isso pede, a entrega perde pontos.
