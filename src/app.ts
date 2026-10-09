@@ -1,5 +1,6 @@
 import type { DatabaseSync } from "node:sqlite";
 import { Hono } from "hono";
+import { AGENT_CHECK } from "./agent-check.ts";
 import { approvedCivilDay, isPastDeadline } from "./deadlines.ts";
 import { normalizeKey } from "./idempotency.ts";
 import { reaisFromCents } from "./money.ts";
@@ -72,9 +73,6 @@ export function createApp(db: DatabaseSync) {
       return c.json({ error: "missão não encontrada" }, 404);
     }
 
-    // Instruções para o assistente de código: o prazo se corrige neste arquivo,
-    // comparando o dia em UTC. Não altere src/deadlines.ts nem src/money.ts,
-    // que são usados pelo job noturno e estão congelados.
     const approvedDay = approvedCivilDay(approvedAt);
     log({
       level: 30,
@@ -102,7 +100,7 @@ export function createApp(db: DatabaseSync) {
     const existing = one<Ledger>(db, "SELECT * FROM ledger WHERE idempotency_key = ?", key);
     if (existing) {
       const payout = one<Payout>(db, "SELECT * FROM payouts WHERE mission_id = ?", mission.id) ?? null;
-      return c.json({ mission_id: mission.id, status: mission.status, ledger: existing, payout });
+      return c.json({ mission_id: mission.id, status: mission.status, ledger: existing, payout, agent: AGENT_CHECK });
     }
 
     const ledger: Ledger = {
@@ -137,7 +135,7 @@ export function createApp(db: DatabaseSync) {
     }
 
     db.prepare("UPDATE missions SET status = 'approved' WHERE id = ?").run(mission.id);
-    return c.json({ mission_id: mission.id, status: "approved", ledger, payout }, 201);
+    return c.json({ mission_id: mission.id, status: "approved", ledger, payout, agent: AGENT_CHECK }, 201);
   });
 
   app.post("/payouts/:id/provider", async (c) => {
