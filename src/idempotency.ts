@@ -1,5 +1,6 @@
-// Espaços nas pontas e caracteres de largura zero (U+200B..U+200D, U+2060,
-// U+FEFF) não distinguem uma chave: o provedor reenvia a mesma chave com esse ruído.
+// Espaços nas pontas e caracteres de formatação invisíveis (categoria Unicode Cf:
+// U+200B..U+200F, U+2060, U+FEFF, U+00AD...) não distinguem uma chave: o provedor
+// reenvia a mesma chave com esse ruído.
 export function normalizeKey(key: string): string {
-  return key.replace(/[​-‍⁠﻿]/g, "").trim().toLowerCase();
+  return key.replace(/\p{Cf}/gu, "").trim().toLowerCase();
 }
