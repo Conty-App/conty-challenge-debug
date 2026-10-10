@@ -3,9 +3,11 @@ export function mapProviderStatus(
 ): "paid" | "pending" | "failed" | "unknown" {
   switch (providerStatus) {
     case "RECEIVED":
-    case "CONFIRMED":
-    case "PENDING":
       return "paid";
+    case "CONFIRMED":
+      return "paid";
+    case "PENDING":
+      return "pending";
     case "FAILED":
       return "failed";
     default:
