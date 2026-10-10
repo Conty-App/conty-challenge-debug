@@ -86,7 +86,8 @@ export function createApp(db: DatabaseSync) {
       amount_cents: mission.amount_cents,
     });
 
-    if (isPastDeadline(approvedAt, mission.deadline_date)) {
+    const approvedAtInLocalDate = new Date(approvedAt).toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+    if (isPastDeadline(approvedAtInLocalDate, mission.deadline_date)) {
       log({
         level: 40,
         msg: "approval.rejected",
@@ -109,7 +110,7 @@ export function createApp(db: DatabaseSync) {
       id: crypto.randomUUID(),
       mission_id: mission.id,
       idempotency_key: key,
-      amount_brl: reaisFromCents(mission.amount_cents),
+      amount_brl: mission.amount_cents / 100,
       created_at: new Date().toISOString(),
     };
     db.prepare(
